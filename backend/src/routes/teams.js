@@ -1,0 +1,17 @@
+const express=require('express');
+const rateLimit=require('express-rate-limit');
+const c=require('../controllers/teamController');
+const router=express.Router();
+const authLimit=rateLimit({windowMs:15*60*1000,max:30,standardHeaders:true,legacyHeaders:false});
+router.post('/mentors/register',authLimit,c.mentorRegister);
+router.post('/mentors/signin',authLimit,c.mentorSignIn);
+router.use(c.requireAccount);
+router.use((req,res,next)=>{res.set('Cache-Control','no-store');next();});
+router.get('/account',c.account);
+router.get('/search',c.search);
+router.get('/',c.list);
+router.get('/:teamId/members/:studentId',c.overview);
+router.get('/:teamId/insights',c.insights);
+router.get('/:teamId',c.detail);
+router.post('/actions/:operation',rateLimit({windowMs:60000,max:60,standardHeaders:true,legacyHeaders:false}),c.mutate);
+module.exports=router;

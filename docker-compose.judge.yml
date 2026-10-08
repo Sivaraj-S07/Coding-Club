@@ -1,0 +1,33 @@
+# Self-hosted Piston sandbox (optional).
+#
+# The public Piston API (https://emkc.org/api/v2/piston/execute) has been
+# whitelist-only since 2026-02-15 and answers HTTP 401, which is why the
+# backend no longer uses it by default. If you cannot install gcc / g++ /
+# python3 / a JDK directly on the app server, run your own sandbox here:
+#
+#   docker compose -f docker-compose.judge.yml up -d
+#   docker exec piston piston-cli ppman install python 3.12.0
+#   docker exec piston piston-cli ppman install gcc 10.2.0      # provides C and C++
+#   docker exec piston piston-cli ppman install java 15.0.2
+#
+# Then in backend/.env:
+#   CODE_EXEC_URL=http://localhost:2000/api/v2/execute
+#
+# Runtimes are installed once, here, ahead of time — never during a student's
+# Run or Submit.
+
+services:
+  piston:
+    image: ghcr.io/engineer-man/piston
+    container_name: piston
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "2000:2000"
+    volumes:
+      - piston-packages:/piston/packages
+    tmpfs:
+      - /tmp:exec,mode=1777
+
+volumes:
+  piston-packages:
